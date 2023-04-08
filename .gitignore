@@ -1,0 +1,5 @@
+catpkgs/
+.vscode/
+*.out
+nyassembler.cpp
+*.nyasm
