@@ -1,0 +1,13 @@
+[Main]
+
+[Info]
+name = "nyasm"
+version = "0.0.1"
+
+[Download]
+files = ["nyasm.hpp"]
+dependencies = ["https://raw.githubusercontent.com/labricecat/stack-nyachine/main/","https://raw.githubusercontent.com/catcaretaker/kittenlexer/main/"]
+scripts = []
+tags = []
+authors = []
+
