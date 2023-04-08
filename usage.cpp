@@ -12,6 +12,7 @@ std::string rd(std::string f) {
 
 int main() {
     using namespace stack_nyachine;
+
     StackNyachine m = compile(rd("test.nyasm"));
 
     for(size_t i = 0; i < 50; ++i) {

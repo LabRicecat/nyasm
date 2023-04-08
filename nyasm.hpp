@@ -357,11 +357,15 @@ std::string eval_argument(std::string source, return_t& v, position_t pos, stack
         source.pop_back();
 
         std::string rhs, lhs, op;
-        for(auto i : source)
-            if(i == '-' || i == '+') op = i;
+        std::stack<char> brc;
+        for(auto i : source) {
+            if(i == '[' || i == '{') brc.push(i);
+            if(i == ']' || i == '}') brc.pop(); // todo: errorchecks
+            if((i == '-' || i == '+' ) && brc.empty()) op = i;
             else if(isspace(i)) continue;
             else if(op == "") lhs += i;
             else rhs += i;
+        }
         
         lhs = eval_argument(lhs,v,pos,counter);
         if(rhs != "") {
@@ -388,7 +392,7 @@ std::string eval_argument(std::string source, return_t& v, position_t pos, stack
 
 stack_nyachine::StackNyachine compile(std::string source, 
     stack_nyachine::StackNyachine::size_tywp memory_size = 100000, 
-    stack_nyachine::StackNyachine::size_tywp heap_size = 100000) {
+    stack_nyachine::StackNyachine::size_tywp heap_size = 100000, bool shrink = false) {
     KittenLexer lexer = KittenLexer()
         .add_capsule('(',')')
         .add_capsule('[',']')
@@ -412,7 +416,7 @@ stack_nyachine::StackNyachine compile(std::string source,
         lines.back().push_back(i);
     }
     stack_nyachine::StackNyachine m(memory_size,heap_size);
-    int lp = -1;
+    long long lp = -1; // TODO: fix this (too small)
 
     for(auto i : lines) {
         replace_macros(i,memory_size,heap_size);
@@ -450,6 +454,8 @@ stack_nyachine::StackNyachine compile(std::string source,
         }
     }
     m.memowory[++lp] = stack_nyachine::OPT_AAH_STOPP;
+    if(shrink)
+        m.memowory_size = lp;
     return m;
 }
 
