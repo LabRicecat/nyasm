@@ -12,16 +12,18 @@ std::string rd(std::string f) {
 
 int main() {
     using namespace stack_nyachine;
+    std::string debuginfo;
 
-    StackNyachine m = compile(rd("test.nyasm"));
+    StackNyachine m = compile(rd("test.nyasm"),true,&debuginfo);
 
     for(size_t i = 0; i < 50; ++i) {
         std::cout << (int)m.memowory[i] << " ";
         if(i%10 == 0 && i != 0) std::cout << "\n";
     }
     std::cout << "\n";
+    std::cout << debuginfo << "\n";
     
     stack_nyachine::NyaSignal sig = ruwun(&m,0);
     if(sig != 0) std::cout << "Signal: " << sig << "\n"; 
-    std::cout << "30: " << (int)m.heawp[30] << "\n";
+    std::cout << "30 -> " << (int)m.heawp[30] << "\n";
 }

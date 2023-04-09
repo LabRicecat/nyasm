@@ -390,9 +390,9 @@ std::string eval_argument(std::string source, return_t& v, position_t pos, stack
     else return source;
 }
 
-stack_nyachine::StackNyachine compile(std::string source, 
+stack_nyachine::StackNyachine compile(std::string source, bool shrink = false, std::string* debuginfo = nullptr, 
     stack_nyachine::StackNyachine::size_tywp memory_size = 100000, 
-    stack_nyachine::StackNyachine::size_tywp heap_size = 100000, bool shrink = false) {
+    stack_nyachine::StackNyachine::size_tywp heap_size = 100000) {
     KittenLexer lexer = KittenLexer()
         .add_capsule('(',')')
         .add_capsule('[',']')
@@ -419,12 +419,14 @@ stack_nyachine::StackNyachine compile(std::string source,
     long long lp = -1; // TODO: fix this (too small)
 
     for(auto i : lines) {
+        if(debuginfo != nullptr) *debuginfo += std::to_string(i.front().line) + ": " + std::to_string(lp+1) + "-";
         replace_macros(i,memory_size,heap_size);
         std::string inst = i.front().src;
         ++lp;
         if(i.size() == 2 && i[1].src == ":") {
             m.memowory[lp] = stack_nyachine::OPT_NOwOP;
             labels[i.front().src] = lp;
+            if(debuginfo != nullptr) *debuginfo += std::to_string(lp) + "\n";    
             continue;
         }
         if(instructions.count(inst) == 0) {
@@ -446,6 +448,7 @@ stack_nyachine::StackNyachine compile(std::string source,
         for(size_t j = 0; j < res.size(); ++j, ++lp)
             m.memowory[lp] = res[j];
         --lp;
+        if(debuginfo != nullptr) *debuginfo += std::to_string(lp) + "\n";        
     }
     for(auto i : unresolved_labels) {
         if(labels.count(i.first) == 0) { std::cout << "undefined label: \"" + i.first + "\"\n"; break; }
@@ -458,7 +461,5 @@ stack_nyachine::StackNyachine compile(std::string source,
         m.memowory_size = lp;
     return m;
 }
-
-
 
 #endif
