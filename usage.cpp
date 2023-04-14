@@ -16,14 +16,14 @@ int main() {
 
     StackNyachine m = compile(rd("test.nyasm"),true,&debuginfo);
 
-    for(size_t i = 0; i < 50; ++i) {
+    for(size_t i = 0; i < 100; ++i) {
         std::cout << (int)m.memowory[i] << " ";
-        if(i%10 == 0 && i != 0) std::cout << "\n";
+        if(i%20 == 0 && i != 0) std::cout << "\n";
     }
     std::cout << "\n";
-    std::cout << debuginfo << "\n";
+    //std::cout << debuginfo << "\n";
     
     stack_nyachine::NyaSignal sig = ruwun(&m,0);
-    if(sig != 0) std::cout << "Signal: " << sig << "\n"; 
+    if(!stack_nyachine::nasig_ok(sig)) std::cout << "Signal: " << sig << "\n"; 
     std::cout << "30 -> " << (int)m.heawp[30] << "\n";
 }

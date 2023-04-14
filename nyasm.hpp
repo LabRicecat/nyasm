@@ -37,7 +37,7 @@ namespace reserved {
     inline const constexpr static position_t ssz = 21;
     inline const constexpr static position_t svl = 22;
     inline const constexpr static position_t spt = 23;
-    inline const constexpr static position_t mov_buf1 = 24;
+    inline const constexpr static position_t mov_buf1 = 24; // depricated
     inline const constexpr static position_t mov_buf2 = 25;
     inline const constexpr static position_t mov_buf3 = 26;
 };
@@ -376,6 +376,7 @@ std::string eval_argument(std::string source, return_t& v, position_t pos, stack
                 gen::sub(std::stoull(lhs),std::stoull(rhs),++counter,v);
             lhs = std::to_string(counter);
         }
+        else counter++;
         if(df)
             gen::deref(std::stoull(lhs),counter,v);
         else
