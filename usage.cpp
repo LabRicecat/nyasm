@@ -10,11 +10,15 @@ std::string rd(std::string f) {
     return r;
 }
 
-int main() {
+int main(int argc, char** argv) {
+    if(argc != 2) {
+        std::cout << "No input file given!\n";
+        return 1;
+    }
     using namespace stack_nyachine;
     std::string debuginfo;
 
-    StackNyachine m = compile(rd("test.nyasm"),true,&debuginfo);
+    StackNyachine m = compile(rd(std::string(argv[1])),true,&debuginfo);
 
     for(size_t i = 0; i < 100; ++i) {
         std::cout << (int)m.memowory[i] << " ";

@@ -305,7 +305,7 @@ inline std::map<std::string,std::function<return_t(std::vector<std::string>, pos
     }},
 };
 
-void replace_macros(lexed_kittens& line, msize_t memory_size, msize_t heap_size) {
+void replace_macros(lexed_kittens& line) {
     for(auto& j : line)
         if(macros.count(j.src) != 0) j.src = macros[j.src];
 }
@@ -327,6 +327,8 @@ std::string check_builtin(std::string current, return_t& v, position_t pos) {
         v.push_back(reserved::spt);
         return std::to_string(reserved::spt);
     }
+    if(macros.count(current) != 0) return macros[current];
+    
     return current;
 }
 
@@ -421,7 +423,7 @@ stack_nyachine::StackNyachine compile(std::string source, bool shrink = false, s
 
     for(auto i : lines) {
         if(debuginfo != nullptr) *debuginfo += std::to_string(i.front().line) + ": " + std::to_string(lp+1) + "-";
-        replace_macros(i,memory_size,heap_size);
+        replace_macros(i);
         std::string inst = i.front().src;
         ++lp;
         if(i.size() == 2 && i[1].src == ":") {

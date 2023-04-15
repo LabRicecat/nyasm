@@ -2,12 +2,11 @@
 
 [Info]
 name = "nyasm"
-version = "0.0.4"
+version = "0.0.5"
+tags = []
+authors = []
 
 [Download]
 files = ["nyasm.hpp"]
 dependencies = ["https://raw.githubusercontent.com/labricecat/stack-nyachine/main/","https://raw.githubusercontent.com/catcaretaker/kittenlexer/main/"]
 scripts = []
-tags = []
-authors = []
-
