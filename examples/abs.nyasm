@@ -30,10 +30,47 @@ MIN:
     div rv1 %2 %rv1
     return 
 
+MAX:
+    sub [spt-%1] [spt-%2] %rv1 
+    push rv1
+    call ABS 
+    pop
+    add [spt-%2] rv1 %rv1
+    add [spt-%1] rv1 %rv1 
+    div rv1 %2 %rv1
+    return 
+
+GREATER:
+    push [spt-%1]
+    push [spt-%3]
+    call MAX 
+    pop 
+    pop
+    jumpif [spt-%2] rv1 GREATER_1
+    move %0 %rv1 
+    return
+GREATER_1:
+    move %1 %rv1 
+    return
+
+LESS:
+    push [spt-%1]
+    push [spt-%3]
+    call MAX 
+    pop 
+    pop
+    jumpif [spt-%1] rv1 LESS_1
+    move %0 %rv1 
+    return
+LESS_1:
+    move %1 %rv1 
+    return
+
+
 MAIN:
     push %12
     push %10
-    call MIN 
+    call LESS 
     pop
     pop
     move rv1 %30

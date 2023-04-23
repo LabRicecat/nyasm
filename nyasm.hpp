@@ -134,43 +134,6 @@ namespace gen {
         _gen_N(stack_nyachine::OPT_POwOPS);
     }
 
-    msize_t mod_size() { return gen::div_size() + gen::mul_size() + gen::sub_size(); }
-    void mod(position_t a, position_t b, position_t dest, return_t& v) {
-        gen::div(a,b,reserved::math_buf1,reserved::math_buf2,v);
-        gen::mul(b,reserved::math_buf1,reserved::math_buf1,v);
-        gen::sub(a,reserved::math_buf1,dest,v);
-    }
-
-    msize_t abs_size() { return gen::push_size()*2 + gen::mul_size()*2 + gen::mod_size() + gen::add_size(); }
-    void abs(position_t a, position_t dest, return_t& v) {
-        gen::push(2,reserved::math_buf1,v);
-        gen::mul(a,reserved::math_buf1,reserved::math_buf2,v);
-        gen::push(1,reserved::math_buf3,v);
-        gen::add(reserved::math_buf2,reserved::math_buf3,reserved::math_buf3,v);
-        gen::mod(reserved::math_buf3,reserved::math_buf1,reserved::math_buf1,v);
-        gen::mul(a,reserved::math_buf1,dest,v);
-    }
-
-    msize_t min() {}
-    void min(position_t a, position_t b, position_t dest, return_t& v) {
-        gen::sub(a,b,reserved::math_buf1,v); // (a-b)
-        gen::abs(reserved::math_buf1,reserved::math_buf1,v); // abs(a-b)
-        gen::add(a,b,reserved::math_buf2,v); // (a+b)
-        gen::sub(reserved::math_buf2,reserved::math_buf1,reserved::math_buf1,v); // (a+b) - abs(a-b)
-        gen::push(2,reserved::math_buf2,v);
-        gen::div(reserved::math_buf1,reserved::math_buf2,dest,reserved::math_buf3,v);
-    }
-
-    msize_t max() {}
-    void max(position_t a, position_t b, position_t dest, return_t& v) {
-        gen::sub(a,b,reserved::math_buf1,v);
-        gen::abs(reserved::math_buf1,reserved::math_buf1,v);
-        gen::add(a,b,reserved::math_buf2,v);
-        gen::add(reserved::math_buf2,reserved::math_buf1,reserved::math_buf1,v);
-        gen::push(2,reserved::math_buf2,v);
-        gen::div(reserved::math_buf1,reserved::math_buf2,dest,reserved::math_buf3,v);
-    }
-
     #undef _gen_N
 }
 
@@ -333,13 +296,6 @@ inline std::map<std::string,std::function<return_t(std::vector<std::string>, pos
         s.push_back(OPT_POwOPS);
         return s;
     }},
-    {"top",[](std::vector<std::string> args, position_t p)->return_t {
-        using namespace stack_nyachine;
-        return_t s;
-        s.push_back(OPT_TOwOPS);
-        s.push_back(std::stoull(args[0]));
-        return s;
-    }},
     {"halt",[](std::vector<std::string> args, position_t p)->return_t {
         using namespace stack_nyachine;
         return_t s;
@@ -347,76 +303,10 @@ inline std::map<std::string,std::function<return_t(std::vector<std::string>, pos
         return s;
     }},
 
-    {"mod",[](std::vector<std::string> args, position_t p)->return_t {
-        using namespace stack_nyachine;
-        return_t s;
-        auto a = std::stoull(args[0]); 
-        auto b = std::stoull(args[1]); 
-        auto dest = std::stoull(args[2]);
-        gen::mod(a,b,dest,s);
-        return s;
-    }},
-    {"abs",[](std::vector<std::string> args, position_t p)->return_t {
-        using namespace stack_nyachine;
-        return_t s;
-        auto a = std::stoull(args[0]);
-        auto dest = std::stoull(args[1]);
-        gen::abs(a,dest,s);
-        return s;
-    }},
-    {"min",[](std::vector<std::string> args, position_t p)->return_t {
-        using namespace stack_nyachine;
-        return_t s;
-        auto a = std::stoull(args[0]);
-        auto b = std::stoull(args[1]);
-        auto dest = std::stoull(args[2]);
-        gen::min(a,b,dest,s);
-        return s;
-    }},
-    {"max",[](std::vector<std::string> args, position_t p)->return_t {
-        using namespace stack_nyachine;
-        return_t s;
-        auto a = std::stoull(args[0]);
-        auto b = std::stoull(args[1]);
-        auto dest = std::stoull(args[2]);
-        gen::max(a,b,dest,s);
-        return s;
-    }},
-    {"jumpifl",[](std::vector<std::string> args, position_t p)->return_t {
-        using namespace stack_nyachine;
-        return_t s;
-        auto a = std::stoull(args[0]);
-        auto b = std::stoull(args[1]);
-        auto dest = std::stoull(args[2]);
-        gen::div(a,b,reserved::math_buf1,reserved::math_buf2,s);
-        gen::mul(b,reserved::math_buf1,reserved::math_buf1,s);
-        gen::sub(a,reserved::math_buf1,dest,s);
-
-        return s;
-    }},
-    {"jumpifm",[](std::vector<std::string> args, position_t p)->return_t {
-        using namespace stack_nyachine;
-        return_t s;
-        auto a = std::stoull(args[0]);
-        auto b = std::stoull(args[1]);
-        auto dest = std::stoull(args[2]);
-        gen::div(a,b,reserved::math_buf1,reserved::math_buf2,s);
-        gen::mul(b,reserved::math_buf1,reserved::math_buf1,s);
-        gen::sub(a,reserved::math_buf1,dest,s);
-
-        return s;
-    }},
-
     {"@mac",[](std::vector<std::string> args, position_t p)->return_t {
         using namespace stack_nyachine;
         macros[args[0]] = args[1];
         return return_t();
-    }},
-    {"@file",[](std::vector<std::string> args, position_t p)->return_t {
-        using namespace stack_nyachine;
-        return_t s;
-        // s.push_back(OPT_AAH_STOPP);
-        return s;
     }},
 };
 
