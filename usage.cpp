@@ -25,9 +25,9 @@ int main(int argc, char** argv) {
         if(i%20 == 0 && i != 0) std::cout << "\n";
     }
     std::cout << "\n";
-    //std::cout << debuginfo << "\n";
+    std::cout << debuginfo << "\n";
     
     stack_nyachine::NyaSignal sig = ruwun(&m,0);
     if(!stack_nyachine::nasig_ok(sig)) std::cout << "Signal: " << sig << "\n"; 
-    std::cout << "30 -> " << (int)m.heawp[30] << "\n";
+    std::cout << "30 -> " << (long long)m.heawp[30] << "\n";
 }

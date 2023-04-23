@@ -1,0 +1,39 @@
+jump MAIN
+
+MOD:
+    div [spt-%1] [spt-%2] %rv1
+    mul [spt-%2] rv1 %rv1 
+    sub [spt-%1] rv1 %rv1 
+    return
+
+ABS: 
+    push %0
+    mul [spt-%2] %2 spt
+    add [spt] %1 spt
+    push %2
+    push [spt-%1]
+    call MOD
+    pop
+    pop
+    move rv1 spt
+    mul [spt-%2] [spt] %rv1
+    pop
+    return 
+
+MIN:
+    sub [spt-%1] [spt-%2] %rv1 
+    push rv1
+    call ABS 
+    pop
+    sub [spt-%2] rv1 %rv1
+    add [spt-%1] rv1 %rv1 
+    div rv1 %2 %rv1
+    return 
+
+MAIN:
+    push %12
+    push %10
+    call MIN 
+    pop
+    pop
+    move rv1 %30

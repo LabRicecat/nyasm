@@ -1,0 +1,31 @@
+jump MAIN
+
+FIB:
+    jump FIB_BODY
+FIB_10:
+    move [spt-%1] %rv1
+    return
+FIB_ELSE:
+    push {[spt-%1]-%1}
+    call FIB
+    pop
+    push rv1
+    push {[spt-%2]-%2}
+    call FIB 
+    pop 
+    push rv1
+    add [spt-%1] [spt] %rv1 
+    pop
+    pop
+    return
+FIB_BODY:
+    jumpif [spt-%1] %1 FIB_10
+    jumpif [spt-%1] %0 FIB_10
+    jump FIB_ELSE
+
+MAIN:
+    push %10
+    call FIB 
+    pop
+    move rv1 %30
+    void
