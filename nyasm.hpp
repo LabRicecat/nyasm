@@ -37,10 +37,23 @@ namespace reserved {
     inline const constexpr static position_t ssz = 21;
     inline const constexpr static position_t svl = 22;
     inline const constexpr static position_t spt = 23;
-    inline const constexpr static position_t math_buf1 = 24; // depricated
+    inline const constexpr static position_t math_buf1 = 24;
     inline const constexpr static position_t math_buf2 = 25;
     inline const constexpr static position_t math_buf3 = 26;
+    inline const constexpr static position_t reserved_max = 27;
 };
+
+inline static constexpr const position_t data_begin() {
+    return reserved::reserved_max;
+}
+
+inline static position_t data_pointer = data_begin();
+
+inline static position_t new_data() {
+    return data_pointer++;
+}
+
+inline static std::map<std::string,position_t> data_field;
 
 namespace gen {
     #define _gen_N(...) v.push_back(__VA_ARGS__)
@@ -155,7 +168,7 @@ inline std::map<std::string,std::function<return_t(std::vector<std::string>, pos
         return_t s;
 
         try {
-            gen::push(std::stoull(args[0]),reserved::jmp_buf1,s);
+            gen::push(std::stoll(args[0]),reserved::jmp_buf1,s);
             gen::jump(reserved::jmp_buf1,reserved::null,reserved::null,s);
             return s;
         }
@@ -175,10 +188,10 @@ inline std::map<std::string,std::function<return_t(std::vector<std::string>, pos
     {"jumpif",[](std::vector<std::string> args, position_t p)->return_t {
         using namespace stack_nyachine;
         return_t s;
-        auto lhs = std::stoull(args[0]);
-        auto rhs = std::stoull(args[1]);
+        auto lhs = std::stoll(args[0]);
+        auto rhs = std::stoll(args[1]);
         try {
-            gen::push(std::stoull(args[2]),reserved::jmp_buf1,s);
+            gen::push(std::stoll(args[2]),reserved::jmp_buf1,s);
             gen::jump(reserved::jmp_buf1,lhs,rhs,s);
             return s;
         }
@@ -198,7 +211,7 @@ inline std::map<std::string,std::function<return_t(std::vector<std::string>, pos
     {"move",[](std::vector<std::string> args, position_t p)->return_t {
         using namespace stack_nyachine;
         return_t s;
-        gen::move(std::stoull(args[1]),std::stoull(args[0]),s);
+        gen::move(std::stoll(args[1]),std::stoll(args[0]),s);
         return s;
     }},
     {"call",[](std::vector<std::string> args, position_t p)->return_t {
@@ -226,37 +239,35 @@ inline std::map<std::string,std::function<return_t(std::vector<std::string>, pos
         gen::jump(reserved::jmp_buf1,reserved::null,reserved::null,s);
         return s;
     }},
-    {"static",[](std::vector<std::string> args, position_t p)->return_t {
+    {"data",[](std::vector<std::string> args, position_t p)->return_t {
         using namespace stack_nyachine;
-        position_t src = std::stoull(args[1]);
-        position_t dest = std::stoull(args[0]);
-        return_t s;
-        gen::push(src,dest,s);
-        return s;
+        if(data_field.count(args[0]) != 0) return {};
+        data_field[args[0]] = new_data();
+        return {};
     }},
     {"add",[](std::vector<std::string> args, position_t p)->return_t {
         using namespace stack_nyachine;
-        position_t lhs = std::stoull(args[0]);
-        position_t rhs = std::stoull(args[1]);
-        position_t des = std::stoull(args[2]);
+        position_t lhs = std::stoll(args[0]);
+        position_t rhs = std::stoll(args[1]);
+        position_t des = std::stoll(args[2]);
         return_t s;
         gen::add(lhs,rhs,des,s);
         return s;
     }},
     {"sub",[](std::vector<std::string> args, position_t p)->return_t {
         using namespace stack_nyachine;
-        position_t lhs = std::stoull(args[0]);
-        position_t rhs = std::stoull(args[1]);
-        position_t des = std::stoull(args[2]);
+        position_t lhs = std::stoll(args[0]);
+        position_t rhs = std::stoll(args[1]);
+        position_t des = std::stoll(args[2]);
         return_t s;
         gen::sub(lhs,rhs,des,s);
         return s;
     }},
     {"mul",[](std::vector<std::string> args, position_t p)->return_t {
         using namespace stack_nyachine;
-        position_t lhs = std::stoull(args[0]);
-        position_t rhs = std::stoull(args[1]);
-        position_t des = std::stoull(args[2]);
+        position_t lhs = std::stoll(args[0]);
+        position_t rhs = std::stoll(args[1]);
+        position_t des = std::stoll(args[2]);
         return_t s;
         gen::mul(lhs,rhs,des,s);
         return s;
@@ -264,30 +275,30 @@ inline std::map<std::string,std::function<return_t(std::vector<std::string>, pos
     {"div",[](std::vector<std::string> args, position_t p)->return_t {
         using namespace stack_nyachine;
         return_t s;
-        auto a = std::stoull(args[0]);
-        auto b = std::stoull(args[1]);
-        auto dest = std::stoull(args[2]);
+        auto a = std::stoll(args[0]);
+        auto b = std::stoll(args[1]);
+        auto dest = std::stoll(args[2]);
         gen::div(a,b,dest,reserved::math_buf1,s);
         return s;
     }},
     {"deref",[](std::vector<std::string> args, position_t p)->return_t {
         using namespace stack_nyachine;
         return_t s;
-        gen::deref(std::stoull(args[0]),std::stoull(args[1]),s);
+        gen::deref(std::stoll(args[0]),std::stoll(args[1]),s);
         return s;
     }},
     {"ssize",[](std::vector<std::string> args, position_t p)->return_t {
         using namespace stack_nyachine;
         return_t s;
         s.push_back(OPT_SSIZE);
-        s.push_back(std::stoull(args[0]));
+        s.push_back(std::stoll(args[0]));
         return s;
     }},
     {"push",[](std::vector<std::string> args, position_t p)->return_t {
         using namespace stack_nyachine;
         return_t s;
         s.push_back(OPT_PUwUSHS);
-        s.push_back(std::stoull(args[0]));
+        s.push_back(std::stoll(args[0]));
         return s;
     }},
     {"pop",[](std::vector<std::string> args, position_t p)->return_t {
@@ -333,14 +344,14 @@ std::string check_builtin(std::string current, return_t& v, position_t pos) {
         return std::to_string(reserved::spt);
     }
     if(macros.count(current) != 0) return macros[current];
-    
+    if(data_field.count(current) != 0) return std::to_string(data_field[current]);
     return current;
 }
 
 void pargs_literal_check(std::string& src, position_t pos, return_t& v, position_t into) {
     src = check_builtin(src,v,pos);
     try {
-        gen::push(std::stoull(src),into,v);
+        gen::push(std::stoll(src),into,v);
         src = std::to_string(into);
     }
     catch(...) {
@@ -379,9 +390,9 @@ std::string eval_argument(std::string source, return_t& v, position_t pos, stack
             rhs = eval_argument(rhs,v,pos,counter);
             gen::push(counter,++counter,v);
             if(op == "+")
-                gen::add(std::stoull(lhs),std::stoull(rhs),counter,v);
+                gen::add(std::stoll(lhs),std::stoll(rhs),counter,v);
             else if(op == "-")
-                gen::sub(std::stoull(lhs),std::stoull(rhs),counter,v);
+                gen::sub(std::stoll(lhs),std::stoll(rhs),counter,v);
             if(df) {
                 ++counter; 
                 gen::push(counter,counter,v);
@@ -391,7 +402,7 @@ std::string eval_argument(std::string source, return_t& v, position_t pos, stack
         else {
             if(df) {
                 gen::push(counter,counter,v);
-                gen::deref(std::stoull(lhs),counter,v);
+                gen::deref(std::stoll(lhs),counter,v);
             }
         }
 
