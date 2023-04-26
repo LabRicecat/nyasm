@@ -43,6 +43,35 @@ namespace reserved {
     inline const constexpr static position_t reserved_max = 27;
 };
 
+struct SyntaxException {
+    std::string message;
+    SyntaxException(std::string s) { message = s; }
+};
+
+struct ArgumentException {
+    std::string instruction;
+    int required = 0;
+    int got = 0;
+};
+
+struct FailedExecutionException {
+    std::vector<SyntaxException> syntax;
+    std::vector<ArgumentException> argument;
+};
+
+long long num(std::string s) {
+    try {
+        return std::stoll(s);
+    }
+    catch(...) {
+        throw SyntaxException("Unresolvable argument: \"" + s + "\"");
+    }
+    return 0;
+}
+void argcheck(std::string name, int fixed, int size) {
+    if(size != fixed) throw ArgumentException{name,fixed,size};
+}
+
 inline static constexpr const position_t data_begin() {
     return reserved::reserved_max;
 }
@@ -154,16 +183,19 @@ inline std::map<std::string, std::string> macros = {
     {"rv1",std::to_string(reserved::ret_buf1)},
     {"rv2",std::to_string(reserved::ret_buf2)},
     {"rv3",std::to_string(reserved::ret_buf3)},
+    {"null",std::to_string(reserved::null)}
 };
 
 inline std::map<std::string,std::function<return_t(std::vector<std::string>, position_t)>> instructions = {
     {"void",[](std::vector<std::string> args, position_t p)->return_t {
+        argcheck("void",0,args.size());
         using namespace stack_nyachine;
         return_t s;
         s.push_back(OPT_NOwOP);
         return s;
     }},
     {"jump",[](std::vector<std::string> args, position_t p)->return_t {
+        argcheck("jump",1,args.size());
         using namespace stack_nyachine;
         return_t s;
 
@@ -188,8 +220,9 @@ inline std::map<std::string,std::function<return_t(std::vector<std::string>, pos
     {"jumpif",[](std::vector<std::string> args, position_t p)->return_t {
         using namespace stack_nyachine;
         return_t s;
-        auto lhs = std::stoll(args[0]);
-        auto rhs = std::stoll(args[1]);
+        argcheck("jumpif",3,args.size());
+        auto lhs = num(args[0]);
+        auto rhs = num(args[1]);
         try {
             gen::push(std::stoll(args[2]),reserved::jmp_buf1,s);
             gen::jump(reserved::jmp_buf1,lhs,rhs,s);
@@ -209,13 +242,15 @@ inline std::map<std::string,std::function<return_t(std::vector<std::string>, pos
         return s;
     }},
     {"move",[](std::vector<std::string> args, position_t p)->return_t {
+        argcheck("move",2,args.size());
         using namespace stack_nyachine;
         return_t s;
-        gen::move(std::stoll(args[1]),std::stoll(args[0]),s);
+        gen::move(num(args[1]),num(args[0]),s);
         return s;
     }},
     {"call",[](std::vector<std::string> args, position_t p)->return_t {
         return_t s;
+        argcheck("call",1,args.size());
         auto after_jmp = p + gen::push_size() + gen::spush_size() + gen::jump_size()
             + gen::push_size();
         gen::push(after_jmp,reserved::jmp_buf1,s);
@@ -232,6 +267,7 @@ inline std::map<std::string,std::function<return_t(std::vector<std::string>, pos
         return s;
     }},
     {"return",[](std::vector<std::string> args, position_t p)->return_t {
+        argcheck("return",0,args.size());
         return_t s;
         gen::stop(reserved::jmp_buf1,s);
         gen::spop(s);
@@ -240,74 +276,76 @@ inline std::map<std::string,std::function<return_t(std::vector<std::string>, pos
         return s;
     }},
     {"data",[](std::vector<std::string> args, position_t p)->return_t {
+        argcheck("data",1,args.size());
         using namespace stack_nyachine;
         if(data_field.count(args[0]) != 0) return {};
         data_field[args[0]] = new_data();
         return {};
     }},
     {"add",[](std::vector<std::string> args, position_t p)->return_t {
+        argcheck("add",3,args.size());
         using namespace stack_nyachine;
-        position_t lhs = std::stoll(args[0]);
-        position_t rhs = std::stoll(args[1]);
-        position_t des = std::stoll(args[2]);
+        position_t lhs = num(args[0]);
+        position_t rhs = num(args[1]);
+        position_t des = num(args[2]);
         return_t s;
         gen::add(lhs,rhs,des,s);
         return s;
     }},
     {"sub",[](std::vector<std::string> args, position_t p)->return_t {
+        argcheck("sub",3,args.size());
         using namespace stack_nyachine;
-        position_t lhs = std::stoll(args[0]);
-        position_t rhs = std::stoll(args[1]);
-        position_t des = std::stoll(args[2]);
+        position_t lhs = num(args[0]);
+        position_t rhs = num(args[1]);
+        position_t des = num(args[2]);
         return_t s;
         gen::sub(lhs,rhs,des,s);
         return s;
     }},
     {"mul",[](std::vector<std::string> args, position_t p)->return_t {
+        argcheck("mul",3,args.size());
         using namespace stack_nyachine;
-        position_t lhs = std::stoll(args[0]);
-        position_t rhs = std::stoll(args[1]);
-        position_t des = std::stoll(args[2]);
+        position_t lhs = num(args[0]);
+        position_t rhs = num(args[1]);
+        position_t des = num(args[2]);
         return_t s;
         gen::mul(lhs,rhs,des,s);
         return s;
     }},
     {"div",[](std::vector<std::string> args, position_t p)->return_t {
+        argcheck("div",3,args.size());
         using namespace stack_nyachine;
         return_t s;
-        auto a = std::stoll(args[0]);
-        auto b = std::stoll(args[1]);
-        auto dest = std::stoll(args[2]);
+        auto a = num(args[0]);
+        auto b = num(args[1]);
+        auto dest = num(args[2]);
         gen::div(a,b,dest,reserved::math_buf1,s);
         return s;
     }},
     {"deref",[](std::vector<std::string> args, position_t p)->return_t {
+        argcheck("deref",2,args.size());
         using namespace stack_nyachine;
         return_t s;
-        gen::deref(std::stoll(args[0]),std::stoll(args[1]),s);
-        return s;
-    }},
-    {"ssize",[](std::vector<std::string> args, position_t p)->return_t {
-        using namespace stack_nyachine;
-        return_t s;
-        s.push_back(OPT_SSIZE);
-        s.push_back(std::stoll(args[0]));
+        gen::deref(num(args[0]),num(args[1]),s);
         return s;
     }},
     {"push",[](std::vector<std::string> args, position_t p)->return_t {
+        argcheck("push",1,args.size());
         using namespace stack_nyachine;
         return_t s;
         s.push_back(OPT_PUwUSHS);
-        s.push_back(std::stoll(args[0]));
+        s.push_back(num(args[0]));
         return s;
     }},
     {"pop",[](std::vector<std::string> args, position_t p)->return_t {
+        argcheck("pop",0,args.size());
         using namespace stack_nyachine;
         return_t s;
         s.push_back(OPT_POwOPS);
         return s;
     }},
     {"halt",[](std::vector<std::string> args, position_t p)->return_t {
+        argcheck("halt",0,args.size());
         using namespace stack_nyachine;
         return_t s;
         s.push_back(OPT_AAH_STOPP);
@@ -402,7 +440,7 @@ std::string eval_argument(std::string source, return_t& v, position_t pos, stack
         else {
             if(df) {
                 gen::push(counter,counter,v);
-                gen::deref(std::stoll(lhs),counter,v);
+                gen::deref(std::stoull(lhs),counter,v);
             }
         }
 
@@ -442,8 +480,8 @@ stack_nyachine::StackNyachine compile(std::string source, bool shrink = false, s
         lines.back().push_back(i);
     }
     stack_nyachine::StackNyachine m(memory_size,heap_size);
-    long long lp = -1; // TODO: fix this (too small)
-
+    long long lp = -1;
+    FailedExecutionException fail;
     for(auto i : lines) {
         if(debuginfo != nullptr) *debuginfo += std::to_string(i.front().line) + ": " + std::to_string(lp+1) + "-";
         replace_macros(i);
@@ -456,8 +494,13 @@ stack_nyachine::StackNyachine compile(std::string source, bool shrink = false, s
             continue;
         }
         if(instructions.count(inst) == 0) {
-            std::cout << "Unknown instruction \"" << inst << "\" in line " << i.front().line << "\n";
-            return{0,0};
+            SyntaxException err("Unknown instruction: " + inst);
+            std::cout << "SyntaxException in line " << i.front().line << "\n"
+            << " | ";
+            for(auto k : i) std::cout << k.src << " ";
+            std::cout << "\n:: " << err.message << "\n";
+            fail.syntax.push_back(err);
+            continue;
         }
         std::vector<std::string> args;
         stack_nyachine::chuwunk counter = reserved::argtmp_buf1;
@@ -468,8 +511,26 @@ stack_nyachine::StackNyachine compile(std::string source, bool shrink = false, s
                 for(auto j : v)
                     m.memowory[lp++] = j;
         }
-        
-        return_t res = instructions[inst](args,lp);
+        return_t res;
+        try {
+            res = instructions[inst](args,lp);
+        }
+        catch(SyntaxException& err) {
+            std::cout << "SyntaxException in line " << i.front().line << "\n"
+            << " | ";
+            for(auto k : i) std::cout << k.src << " ";
+            std::cout << "\n:: " << err.message << "\n";
+            fail.syntax.push_back(err);
+            continue;
+        }
+        catch(ArgumentException& err) {
+            std::cout << "ArgumentException in line " << i.front().line << "\n"
+            << " | ";
+            for(auto k : i) std::cout << k.src << " ";
+            std::cout << "\n:: " << "Required: " << err.required << " | Got: " << err.got << "\n";
+            fail.argument.push_back(err);
+            continue;
+        }
 
         for(size_t j = 0; j < res.size(); ++j, ++lp)
             m.memowory[lp] = res[j];
@@ -485,7 +546,9 @@ stack_nyachine::StackNyachine compile(std::string source, bool shrink = false, s
     m.memowory[++lp] = stack_nyachine::OPT_AAH_STOPP;
     if(shrink)
         m.memowory_size = lp;
-    return m;
+    if(fail.syntax.size() == 0 && fail.argument.size() == 0)
+        return m;
+    throw fail;
 }
 
 #endif
