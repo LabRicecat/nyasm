@@ -440,7 +440,7 @@ std::string eval_argument(std::string source, return_t& v, position_t pos, stack
         else {
             if(df) {
                 gen::push(counter,counter,v);
-                gen::deref(std::stoull(lhs),counter,v);
+                gen::deref(std::stoll(lhs),counter,v);
             }
         }
 

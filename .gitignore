@@ -1,5 +1,5 @@
 catpkgs/
 .vscode/
 *.out
-nyassembler.cpp
-*.nyasm
+*.txt
+test*
