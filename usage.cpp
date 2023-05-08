@@ -44,8 +44,9 @@ int main(int argc, char** argv) {
     }
     else if(action == "run") {
         std::string file = std::string(argv[2]);
-        StackNyachine m(1,1);
+        StackNyachine m(1,100000);
         fromfile(file.c_str(),&m);
+        
         stack_nyachine::NyaSignal sig = ruwun(&m,0);
         if(!stack_nyachine::nasig_ok(sig)) std::cout << "Signal: " << sig << "\n"; 
         else std::cout << "Execution exited normally\n";
