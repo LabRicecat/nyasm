@@ -200,7 +200,7 @@ inline std::map<std::string,std::function<return_t(std::vector<std::string>, pos
         return_t s;
 
         try {
-            gen::push(std::stoll(args[0]),reserved::jmp_buf1,s);
+            gen::deref(std::stoll(args[0]),reserved::jmp_buf1,s);
             gen::jump(reserved::jmp_buf1,reserved::null,reserved::null,s);
             return s;
         }
@@ -224,7 +224,7 @@ inline std::map<std::string,std::function<return_t(std::vector<std::string>, pos
         auto lhs = num(args[0]);
         auto rhs = num(args[1]);
         try {
-            gen::push(std::stoll(args[2]),reserved::jmp_buf1,s);
+            gen::deref(std::stoll(args[2]),reserved::jmp_buf1,s);
             gen::jump(reserved::jmp_buf1,lhs,rhs,s);
             return s;
         }

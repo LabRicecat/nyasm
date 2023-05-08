@@ -3,3 +3,5 @@ catpkgs/
 *.out
 *.txt
 test*
+*.snya
+nyassembler
