@@ -255,12 +255,16 @@ inline std::map<std::string,std::function<return_t(std::vector<std::string>, pos
             + gen::push_size();
         gen::push(after_jmp,reserved::jmp_buf1,s);
         gen::spush(reserved::jmp_buf1,s);
-        if(labels.count(args[0]) != 0) {
-            gen::push(labels[args[0]],reserved::jmp_buf1,s);
+
+        try {
+            gen::deref(std::stoll(args[0]),reserved::jmp_buf1,s);
         }
-        else {
-            gen::push(0,reserved::jmp_buf1,s);
-            unresolved_labels[args[0]].push_back(p + s.size() - gen::push_size() + gen::push_data());
+        catch(...) {
+            if(labels.count(args[0]) == 0) {
+                gen::push(0,reserved::jmp_buf1,s);
+                unresolved_labels[args[0]].push_back(p + s.size() - gen::push_size() + gen::push_data());
+            }
+            else gen::push(labels[args[0]],reserved::jmp_buf1,s);
         }
         gen::jump(reserved::jmp_buf1,reserved::null,reserved::null,s);
         gen::nop(s);
