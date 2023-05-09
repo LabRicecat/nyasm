@@ -200,8 +200,7 @@ inline std::map<std::string,std::function<return_t(std::vector<std::string>, pos
         return_t s;
 
         try {
-            gen::deref(std::stoll(args[0]),reserved::jmp_buf1,s);
-            gen::jump(reserved::jmp_buf1,reserved::null,reserved::null,s);
+            gen::jump(std::stoll(args[0]),reserved::null,reserved::null,s);
             return s;
         }
         catch(...) {
@@ -224,8 +223,7 @@ inline std::map<std::string,std::function<return_t(std::vector<std::string>, pos
         auto lhs = num(args[0]);
         auto rhs = num(args[1]);
         try {
-            gen::deref(std::stoll(args[2]),reserved::jmp_buf1,s);
-            gen::jump(reserved::jmp_buf1,lhs,rhs,s);
+            gen::jump(std::stoll(args[2]),lhs,rhs,s);
             return s;
         }
         catch(...) {
@@ -253,11 +251,15 @@ inline std::map<std::string,std::function<return_t(std::vector<std::string>, pos
         argcheck("call",1,args.size());
         auto after_jmp = p + gen::push_size() + gen::spush_size() + gen::jump_size()
             + gen::push_size();
+        
+        try { std::stoll(args[0]); after_jmp -= gen::push_size(); } catch(...) {}
         gen::push(after_jmp,reserved::jmp_buf1,s);
         gen::spush(reserved::jmp_buf1,s);
 
         try {
-            gen::deref(std::stoll(args[0]),reserved::jmp_buf1,s);
+            gen::jump(std::stoll(args[0]),reserved::null,reserved::null,s);
+            gen::nop(s);
+            return s;
         }
         catch(...) {
             if(labels.count(args[0]) == 0) {
