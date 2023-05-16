@@ -29,8 +29,7 @@ int main() {
 ```
 
 # Specification
----
-
+Notable usage of nyasm: [`libnya`](https://github.com/labricecat/libnya)
 ## Chapters:
 - Structure
 - Memory & Stack
